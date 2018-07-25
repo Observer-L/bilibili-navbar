@@ -2,20 +2,27 @@
   <div class="navbar" :style="{top: navbarOffsetTop + 'px'}">
     <div class="navbar-list">
       <template v-for="(item, index) in floorData">
-              <div class="navbar-item sotrable" :class="{'on' : current === index}">{{item.name}}</div>
-</template>
+              <div 
+                class="navbar-item sotrable" 
+                :class="{'on' : current === index}"
+                @click="scrollToFloor(index)"
+                >{{item.name}}</div>
+      </template>
       <div class="navbar-item customize">
         <div>↑↓</div>
         排序
       </div>
     </div>
     <div class="s-line"></div>
-    <div class="back-top">↑</div>
+    <div class="back-top" @click="scrollToTop(time)">↑</div>
   </div>
 </template>
 
 <script>
+import scrollMixin from './smooth-scroll.js';
+
   export default {
+    mixins: [scrollMixin],
     props: {
       options: {
         type: Object
@@ -26,7 +33,8 @@
         current: -1, // 当前到达/选中的楼层的位置，-1为最顶部
         floorData: [], // 储存楼层name、DOM element和OffsetTop等数据
         scrollTop: 0, // 当前页面位置距离顶部的距离
-        navbarOffsetTop: 200 // navbar距离页面顶部的距离
+        navbarOffsetTop: 200, // navbar距离页面顶部的距离
+        time: 500 // 滚动缓动动画时间
       }
     },
     methods: {
@@ -76,7 +84,7 @@
         for (let i = 0; i < this.floorData.length; i++) {
           if (this.scrollTop >= this.floorData[i].offsetTop - this.offset) {
             this.current = i;
-          } else if (this.scrollTop <= this.floorData[0].offsetTop - this.offset) {
+          } else if (this.scrollTop < this.floorData[0].offsetTop - this.offset) {
             // 滚动到顶部则取消高亮
             this.current = -1;
           };
@@ -88,6 +96,13 @@
           }
         }
       },
+      scrollToFloor (index) {
+        // 缓动滚动到指定楼层
+        if (index === this.current) return;
+        this.current = index;
+        const target = this.floorData[index].element;
+        this.scrollToElem(target, this.time, this.offset || 0);
+      }
     },
     computed: {
       //  偏移值
