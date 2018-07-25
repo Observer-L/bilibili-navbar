@@ -1,14 +1,18 @@
 <template>
   <div class="navbar" :style="{top: navbarOffsetTop + 'px'}">
-    <div class="navbar-list">
+    <div class="navbar-list" ref="list">
       <template v-for="(item, index) in floorData">
+              <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem <= dragId"></div>
               <div 
                 class="navbar-item sotrable" 
-                :class="{'on' : current === index}"
+                :class="[{'on' : current === index && !isSort}, {'drag': isDrag && current === index}]"
                 @click="scrollToFloor(index)"
+                @mousedown="startDrag($event, index)"
+                :style="dragStyles"
                 >{{item.name}}</div>
+                <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem > dragId"></div>
       </template>
-      <div class="navbar-item customize">
+      <div class="navbar-item customize" @click="activeSort">
         <div>↑↓</div>
         排序
       </div>
@@ -19,8 +23,8 @@
 </template>
 
 <script>
-import scrollMixin from './smooth-scroll.js';
-
+  import scrollMixin from './smooth-scroll.js';
+  
   export default {
     mixins: [scrollMixin],
     props: {
@@ -34,7 +38,13 @@ import scrollMixin from './smooth-scroll.js';
         floorData: [], // 储存楼层name、DOM element和OffsetTop等数据
         scrollTop: 0, // 当前页面位置距离顶部的距离
         navbarOffsetTop: 200, // navbar距离页面顶部的距离
-        time: 500 // 滚动缓动动画时间
+        time: 500, // 滚动缓动动画时间
+        isSort: false, // 是否开启排序模式
+        isDrag: false, // 是否在拖拽状态
+        dragId: 0, // 拖拽楼层号
+        offsetY: 0, // 鼠标在要拖拽的元素上的Y坐标上的偏移
+        y: 0, // 被拖拽的元素在其相对的元素上的Y坐标上的偏移
+        height: 32, // 导航栏单层的高度
       }
     },
     methods: {
@@ -62,6 +72,9 @@ import scrollMixin from './smooth-scroll.js';
       bindEvent() {
         // 监听页面滚动
         document.addEventListener('scroll', this.scroll);
+        document.addEventListener('mousemove', this.dragMove);
+        document.addEventListener('mouseup', this.dragEnd);
+        document.addEventListener('mouseleave', this.dragEnd);
       },
       //获取每一层楼距离顶部的距离
       getOffsetTop(element) {
@@ -96,12 +109,47 @@ import scrollMixin from './smooth-scroll.js';
           }
         }
       },
-      scrollToFloor (index) {
+      scrollToFloor(index) {
         // 缓动滚动到指定楼层
         if (index === this.current) return;
         this.current = index;
         const target = this.floorData[index].element;
         this.scrollToElem(target, this.time, this.offset || 0);
+      },
+      activeSort() {
+        // 切换排序模式
+        this.isSort = !this.isSort;
+        console.log(this.isSort);
+      },
+      startDrag(e, index) {
+        // 排序模式下拖动导航栏楼层时，获取当前选中楼层ID和鼠标Y轴偏移
+        if (!this.isSort) return;
+        this.isDrag = true;
+        this.current = index;
+        this.dragId = index;
+        this.offsetY = e.offsetY;
+        this.getPos(e);
+      },
+      dragMove(e) {
+        if (this.isDrag) {
+          this.getPos(e);
+        }
+        e.preventDefault();
+      },
+      dragEnd() {
+        if (this.isDrag) {
+          this.isDrag = false;
+          if (this.replaceItem !== this.dragId) {
+            this.options.items.splice(this.replaceItem, 0, this.options.items.splice(this.dragId, 1)[0]);
+          } else {
+            this.scrollToFloor(this.dragId);
+          }
+        }
+      },
+      getPos(e) {
+        // 获取当前选中楼层相对于导航栏的y轴偏移
+        this.y = e.clientY - this.navbarOffsetTop - this.offsetY;
+        console.log(this.y)
       }
     },
     computed: {
@@ -109,10 +157,34 @@ import scrollMixin from './smooth-scroll.js';
       offset() {
         return this.options.offset || 100
       },
+      // 拖拽的元素的position会变为absolute,dragStyles用来设置其位置,鼠标运动时会调用,从而实现跟随鼠标运动的功能
+      dragStyles() {
+        return {
+          top: `${this.y}px`
+        }
+      },
+      //当被拖拽的元素运动到其他元素的位置时,会使得replaceItem发送变化
+      replaceItem() {
+        let id = Math.floor(this.y / this.height);
+        if (id > this.floorData.length - 1)
+          id = this.floorData.length;
+        if (id < 0)
+          id = 0;
+        return id;
+      }
     },
     mounted() {
       this.init();
-    }
+    },
+    watch: {
+      //监听options的变化
+      options: {
+        deep: true, // 深度监听
+        handler(newVal, oldVal) {
+          this.initData();
+        }
+      }
+    },
   }
 </script>
 
@@ -148,6 +220,13 @@ import scrollMixin from './smooth-scroll.js';
           line-height: 20px;
           padding: 8px 0;
           border-top: 1px solid #e5e9ef;
+        }
+        &.drag {
+          position: absolute;
+          height: 32px;
+          width: 100%;
+          background: #00a1d6;
+          color: #fff;
         }
       }
     }
