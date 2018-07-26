@@ -2,8 +2,14 @@
   <div id="app">
     <div class="header"></div>
     <Floor :floors="floors"></Floor>
-    <NavBar :options="options"></NavBar>
+    <NavBar 
+      :options="options" 
+      :isSort="isSort" 
+      @toggleMask="toggleMask"></NavBar>
     <div class="footer"></div>
+    <transition name="fade">
+      <div class="mask" v-if="isSort" @click="toggleMask(false)"></div>
+    </transition>
   </div>
 </template>
 
@@ -19,6 +25,7 @@
     },
     data() {
       return {
+        isSort: false,
         floors: [{
           name: '直播',
           id: 'bili_live'
@@ -85,6 +92,12 @@
         };
         return options;
       }
+    },
+    methods: {
+      toggleMask: function (isSort) {
+        // 是否开启排序模式和遮罩层
+        this.isSort = isSort;
+      }
     }
   }
 </script>
@@ -95,11 +108,26 @@
     color: #000;
     font: 12px Helvetica Neue, Helvetica, Arial, Microsoft Yahei, Hiragino Sans GB, Heiti SC, WenQuanYi Micro Hei, sans-serif;
   }
-  
   .header,
   .footer {
     min-width: 1160px;
     height: 300px;
     background: deepskyblue;
+  }
+  .mask {
+    position: fixed;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,.5);
+    z-index: 10000;
+    top: 0;
+    left: 0;
+  }
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity .3s;
+  }
+  .fade-enter, .fade-leave-to {
+    opacity: 0;
   }
 </style>

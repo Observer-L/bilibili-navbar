@@ -1,17 +1,20 @@
 <template>
-  <div class="navbar" :style="{top: navbarOffsetTop + 'px'}">
+  <div class="navbar" :style="{top: navbarOffsetTop + 'px'}" :class="{ 'edit-state' : isSort }">
+    <div class="nav-bg" :class="{'open' : isSort}">
+      <div class="tips-img"></div>
+    </div>
     <div class="navbar-list" ref="list">
       <template v-for="(item, index) in floorData">
-              <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem <= dragId"></div>
-              <div 
-                class="navbar-item sotrable" 
-                :class="[{'on' : current === index && !isSort}, {'drag': isDrag && current === index}]"
-                @click="scrollToFloor(index)"
-                @mousedown="startDrag($event, index)"
-                :style="dragStyles"
-                >{{item.name}}</div>
-                <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem > dragId"></div>
-      </template>
+                <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem <= dragId"></div>
+                <div 
+                  class="navbar-item sotrable" 
+                  :class="[{'on' : current === index && !isSort}, {'drag': isDrag && current === index}]"
+                  @click="scrollToFloor(index)"
+                  @mousedown="startDrag($event, index)"
+                  :style="dragStyles"
+                  >{{item.name}}</div>
+                  <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem > dragId"></div>
+</template>
       <div class="navbar-item customize" @click="activeSort">
         <div>↑↓</div>
         排序
@@ -30,6 +33,10 @@
     props: {
       options: {
         type: Object
+      },
+      isSort: {
+        // 是否开启排序模式和遮罩层
+        type: Boolean
       }
     },
     data() {
@@ -39,7 +46,6 @@
         scrollTop: 0, // 当前页面位置距离顶部的距离
         navbarOffsetTop: 200, // navbar距离页面顶部的距离
         time: 500, // 滚动缓动动画时间
-        isSort: false, // 是否开启排序模式
         isDrag: false, // 是否在拖拽状态
         dragId: 0, // 拖拽楼层号
         offsetY: 0, // 鼠标在要拖拽的元素上的Y坐标上的偏移
@@ -118,8 +124,8 @@
       },
       activeSort() {
         // 切换排序模式
-        this.isSort = !this.isSort;
-        console.log(this.isSort);
+        // 向父组件传值，切换遮罩层和排序模式
+        this.$emit('toggleMask', !this.isSort);
       },
       startDrag(e, index) {
         // 排序模式下拖动导航栏楼层时，获取当前选中楼层ID和鼠标Y轴偏移
@@ -149,7 +155,6 @@
       getPos(e) {
         // 获取当前选中楼层相对于导航栏的y轴偏移
         this.y = e.clientY - this.navbarOffsetTop - this.offsetY;
-        console.log(this.y)
       }
     },
     computed: {
@@ -195,6 +200,9 @@
     left: 50%;
     margin-left: 590px;
     transition: top .3s ease-in-out;
+    &.edit-state {
+      z-index: 10001;
+    }
     .navbar-list {
       position: relative;
       background-color: #f6f9fa;
@@ -256,6 +264,32 @@
       height: 9px;
       width: 30px;
       margin: 0 auto;
+    }
+    .nav-bg {
+      position: absolute;
+      top: -15px;
+      right: 0;
+      width: 60px;
+      height: 100%;
+      padding-bottom: 20px;
+      overflow: hidden;
+      border-radius: 4px;
+      opacity: 0;
+      background: hsla(0, 0%, 100%, .8);
+      transition: all .3s cubic-bezier(.68, -.55, .27, 1.55);
+      &.open {
+        right: -20px;
+        width: 200px;
+        opacity: 1;
+      }
+      .tips-img {
+        position: absolute;
+        width: 117px;
+        height: 333px;
+        background: url(../assets/tab2233.png);
+        left: 12px;
+        top: 14px;
+      }
     }
   }
 </style>
