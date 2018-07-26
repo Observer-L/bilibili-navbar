@@ -5,16 +5,16 @@
     </div>
     <div class="navbar-list" ref="list">
       <template v-for="(item, index) in floorData">
-                  <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem <= dragId"></div>
-                  <div 
-                    class="navbar-item sotrable" 
-                    :class="[{'on' : current === index && !isSort}, {'drag': isDrag && current === index}]"
-                    @click="scrollToFloor(index)"
-                    @mousedown="startDrag($event, index)"
-                    :style="dragStyles"
-                    >{{item.name}}</div>
-                    <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem > dragId"></div>
-</template>
+        <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem <= dragId"></div>
+        <div 
+          class="navbar-item sotrable" 
+          :class="[{'on' : current === index && !isSort}, {'drag': isDrag && current === index}]"
+          @click="scrollToFloor(index)"
+          @mousedown="startDrag($event, index)"
+          :style="dragStyles"
+          >{{item.name}}</div>
+          <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem > dragId"></div>
+      </template>
       <div class="navbar-item customize" @click="activeSort">
         <div>↑↓</div>
         排序
@@ -57,7 +57,7 @@
       // 初始化
       init() {
         this.initData();
-        this.bindEvent();
+        document.addEventListener('scroll', this.scroll);
       },
       initData() {
         // 初始化导航栏楼层数据floorData
@@ -76,11 +76,14 @@
         })
       },
       bindEvent() {
-        // 监听页面滚动
-        document.addEventListener('scroll', this.scroll);
         document.addEventListener('mousemove', this.dragMove);
         document.addEventListener('mouseup', this.dragEnd);
         document.addEventListener('mouseleave', this.dragEnd);
+      },
+      unbindEvent() {
+        document.removeEventListener('mousemove', this.dragMove);
+        document.removeEventListener('mouseup', this.dragEnd);
+        document.removeEventListener('mouseleave', this.dragEnd);
       },
       //获取每一层楼距离顶部的距离
       getOffsetTop(element) {
@@ -108,11 +111,7 @@
             this.current = -1;
           };
           // 设置整个navbarOffsetTop位置
-          if (this.scrollTop >= this.offset) {
-            this.navbarOffsetTop = 100;
-          } else {
-            this.navbarOffsetTop = 200;
-          }
+          this.scrollTop >= this.offset ? this.navbarOffsetTop = 100 : this.navbarOffsetTop = 200;
         }
       },
       scrollToFloor(index) {
@@ -125,6 +124,7 @@
       activeSort() {
         // 切换排序模式
         // 向父组件传值，切换遮罩层和排序模式
+        this.isSort === true ? this.unbindEvent() : this.bindEvent();
         this.$emit('toggleMask', !this.isSort);
       },
       startDrag(e, index) {
@@ -137,10 +137,8 @@
         this.getPos(e);
       },
       dragMove(e) {
-        if (this.isDrag) {
-          this.getPos(e);
-        }
         e.preventDefault();
+        return this.isDrag === true ? this.getPos(e) : false;
       },
       dragEnd() {
         if (this.isDrag) {
@@ -180,6 +178,10 @@
     },
     mounted() {
       this.init();
+    },
+    beforeDestroy() {
+      document.removeEventListener('scroll', this.scroll);
+      this.unbindEvent();
     },
     watch: {
       //监听options的变化
