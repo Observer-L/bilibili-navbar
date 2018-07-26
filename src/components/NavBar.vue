@@ -5,15 +5,15 @@
     </div>
     <div class="navbar-list" ref="list">
       <template v-for="(item, index) in floorData">
-                <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem <= dragId"></div>
-                <div 
-                  class="navbar-item sotrable" 
-                  :class="[{'on' : current === index && !isSort}, {'drag': isDrag && current === index}]"
-                  @click="scrollToFloor(index)"
-                  @mousedown="startDrag($event, index)"
-                  :style="dragStyles"
-                  >{{item.name}}</div>
-                  <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem > dragId"></div>
+                  <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem <= dragId"></div>
+                  <div 
+                    class="navbar-item sotrable" 
+                    :class="[{'on' : current === index && !isSort}, {'drag': isDrag && current === index}]"
+                    @click="scrollToFloor(index)"
+                    @mousedown="startDrag($event, index)"
+                    :style="dragStyles"
+                    >{{item.name}}</div>
+                    <div class="navbar-item sortable" v-if="isDrag && index === replaceItem && replaceItem > dragId"></div>
 </template>
       <div class="navbar-item customize" @click="activeSort">
         <div>↑↓</div>
