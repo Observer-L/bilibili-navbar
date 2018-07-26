@@ -1,9 +1,7 @@
-# bilibili-navbar
+# 🔵 bilibili-navbar
+> Vue2实现B站首页右侧导航条
 
-> B站首页右侧导航条实现
-
-## [Live Demo](https://htmlpreview.github.io/?https://github.com/Observer-L/bilibili-navbar/blob/master/dist/index.html)
-
+## <a href="https://htmlpreview.github.io/?https://github.com/Observer-L/bilibili-navbar/blob/master/dist/index.html" target="_blank">Live Demo</a>
 ## To-do List
  ✅ 滚动高亮  
  ✅ 返回顶部  
