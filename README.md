@@ -2,6 +2,8 @@
 
 > B站首页右侧导航条实现
 
+## [Live Demo](https://htmlpreview.github.io/?https://github.com/Observer-L/bilibili-navbar/blob/master/dist/index.html)
+
 ## To-do List
  ✅ 滚动高亮  
  ✅ 返回顶部  
@@ -12,7 +14,7 @@
 
 ## 待解决的问题
 1. 楼层排序拖动时，加一个offset而不用整个拖过上下楼层
-2. 拖动排序后，高亮的是最后点击排序的楼层，而不是当前页面所在位置的楼层
+2. 拖动排序后，高亮的是最后点击排序的楼层，而不是当前页面所在位置的楼层  
 ~~3. 拖拽事件只要在排序模式激活下绑定，退出后/组件销毁后解绑，需要优化性能~~
 
 ## Build Setup
